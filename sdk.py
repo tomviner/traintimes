@@ -56,7 +56,7 @@ class Location(RTTBase):
             self.push('arrivals', 'arrivals')
 
 
-class Service(Location):
+class Service(RTTBase):
     """Service Information API
 
     http://www.realtimetrains.co.uk/api/pull/serviceinfo
@@ -65,8 +65,9 @@ class Service(Location):
     tpl = '/service{/service}{+date}'
 
     def __init__(self, service, date):
-        super(Location, self).__init__()
+        super(Service, self).__init__()
 
         self.push('service', service)
-        if isinstance(date, datetime.date):
-            self.push('date', '/{0:%Y}/{0:%m}/{0:%d}'.format(date))
+        assert isinstance(date, datetime.date), \
+            "Expected {} got {}".format(datetime.date, type(date))
+        self.push('date', '/{0:%Y}/{0:%m}/{0:%d}'.format(date))

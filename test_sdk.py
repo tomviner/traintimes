@@ -18,6 +18,9 @@ class TestLocation(object):
     """
     expected_base = 'https://api.rtt.io/api/v1/json/search/'
 
+    def test_repr(self):
+        assert Location('HIB').url == repr(Location('HIB'))
+
     def test_station(self):
         assert Location('HIB').url == self.expected_base + 'HIB'
 
