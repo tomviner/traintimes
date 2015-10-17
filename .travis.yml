@@ -3,7 +3,7 @@ python:
   - "2.7"
 # command to install dependencies
 install:
-    - "pip install tox coveralls"
+    - "pip install tox coveralls pytest-travis-fold"
 # command to run tests
 script: tox
 after_success:
