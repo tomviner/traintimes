@@ -40,7 +40,7 @@ class RTTBase(object):
         return self.uri
 
     def get(self):
-        return requests.get(self.uri, auth=self.auth)
+        return requests.get(self.uri, auth=self.auth).json()
 
 
 class Location(RTTBase):
