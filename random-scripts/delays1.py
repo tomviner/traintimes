@@ -1,5 +1,5 @@
 from datetime import datetime
-from pprint import pprint
+# from pprint import pprint
 from collections import Counter
 
 from sdk import Location, Service
@@ -7,7 +7,9 @@ from sdk import Location, Service
 
 # https://api.rtt.io/api/v1/json/search/HIB/to/CHX/2015/10/14/0800
 
-# jq '.services | .[] | .locationDetail | "\(.gbttBookedDeparture),\(.destination[0].publicTime),\(.realtimeDeparture),\(.realtimeArrival),\(.destination[0].tiploc)"' | sed s/'"'//g | sed s/^/"'"/ | grep CH
+# jq '.services | .[] | .locationDetail | "\(.gbttBookedDeparture),\(
+# .destination[0].publicTime),\(.realtimeDeparture),\(.realtimeArrival),\(
+# .destination[0].tiploc)"' | sed s/'"'//g | sed s/^/"'"/ | grep CH
 
 chx_services = []
 

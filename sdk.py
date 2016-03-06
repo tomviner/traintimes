@@ -52,7 +52,9 @@ class Location(RTTBase):
 
     uri_template = '/search/{station}{+tostation}{+date}{+time}{/arrivals}'
 
-    def __init__(self, station, to_station=None, when=None, arrivals=False, **kwargs):
+    def __init__(
+            self, station, to_station=None, when=None, arrivals=False,
+            **kwargs):
         super(Location, self).__init__(**kwargs)
 
         self.add_to_context('station', station)
