@@ -8,3 +8,7 @@ install:
 script: tox
 after_success:
   - coveralls
+# preserve our API requests (currently limited to 50 per day)
+cache:
+  directories:
+  - .requests_cache
