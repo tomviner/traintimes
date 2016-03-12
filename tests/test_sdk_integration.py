@@ -45,20 +45,27 @@ class TestLocation(object):
     """
     expected_base = 'https://api.rtt.io/api/v1/json/search/'
 
+    def assert_valid_location(self, data):
+        assert data.viewkeys() == {'location', 'filter', 'services'}
+
     def test_station(self):
-        assert Location('HIB').get()
+        self.assert_valid_location(Location('HIB').get())
 
     def test_to_station(self):
-        assert Location('HIB', 'CHX').get()
+        self.assert_valid_location(
+            Location('HIB', 'CHX').get())
 
     def test_date(self, frozen_date):
-        assert Location('HIB', 'CHX', datetime.date.today()).get()
+        self.assert_valid_location(
+            Location('HIB', 'CHX', datetime.date.today()).get())
 
     def test_time(self, frozen_date):
-        assert Location('HIB', 'CHX', datetime.datetime.now()).get()
+        self.assert_valid_location(
+            Location('HIB', 'CHX', datetime.datetime.now()).get())
 
     def test_arrivals(self, frozen_date):
-        assert Location('HIB', 'CHX', datetime.datetime.now(), True).get()
+        self.assert_valid_location(
+            Location('HIB', 'CHX', datetime.datetime.now(), True).get())
 
     def test_before_available_window(self, past_dt):
         with pytest.raises(ResponseError) as exc:
@@ -77,11 +84,32 @@ class TestService(object):
     """
     expected_base = 'https://api.rtt.io/api/v1/json/service/'
 
+    def assert_valid_service(self, data):
+        minimal_service_keys = {
+            'atocCode',
+            'atocName',
+            'destination',
+            'isPassenger',
+            'locations',
+            'origin',
+            'performanceMonitored',
+            'powerType',
+            'runDate',
+            'serviceType',
+            'serviceUid',
+            'trainClass',
+            'trainIdentity'
+        }
+        # every key must be in the data
+        assert minimal_service_keys.issubset(data.viewkeys())
+
     def test_service_date(self, frozen_date, service_code):
-        assert Service(service_code, datetime.date.today()).get()
+        self.assert_valid_service(
+            Service(service_code, datetime.date.today()).get())
 
     def test_service_datetime(self, frozen_date, service_code):
-        assert Service(service_code, datetime.datetime.now()).get()
+        self.assert_valid_service(
+            Service(service_code, datetime.datetime.now()).get())
 
     def test_no_schedule_found_for_far_future(self, future_dt, service_code):
         with pytest.raises(ResponseError) as exc:
