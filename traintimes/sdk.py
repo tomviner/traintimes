@@ -1,20 +1,9 @@
 import datetime
 import os
-import logging
 
 import requests
-import requests_cache
 
 from purl import Template
-
-
-logging.basicConfig(level=logging.DEBUG)
-cache_dir = '.requests_cache'
-try:
-    os.mkdir(cache_dir)
-except OSError:
-    pass
-requests_cache.install_cache(os.path.join(cache_dir, 'cache'))
 
 
 class RTTBase(object):

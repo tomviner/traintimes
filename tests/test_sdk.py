@@ -3,7 +3,7 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
-from sdk import Location, Service
+from traintimes.sdk import Location, Service
 
 
 @pytest.yield_fixture

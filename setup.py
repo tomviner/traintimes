@@ -3,8 +3,15 @@ from setuptools import setup
 setup(
     name='traintimes',
     version='0.1.0.dev0',
-    py_modules=(
-        'sdk',
+
+    author="Tom Viner",
+    author_email="traintimes@viner.tv",
+
+    description="A Python SDK for realtimetrains' API",
+    long_description=open('README.rst').read(),
+
+    packages=(
+        'traintimes',
     ),
     install_requires=(
         'purl==1.1',
