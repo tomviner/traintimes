@@ -5,6 +5,8 @@ import requests
 
 from purl import Template
 
+class ResponseError(Exception):
+    pass
 
 class RTTBase(object):
     """ Base Class for RealTimeTrains API
@@ -34,7 +36,15 @@ class RTTBase(object):
         return self.uri
 
     def get(self):
-        return requests.get(self.uri, auth=self.auth).json()
+        response = requests.get(self.uri, auth=self.auth)
+        assert response.ok, response
+        json_data = response.json()
+        if 'error' in json_data:
+            raise ResponseError(
+                '{}: {}'.format(
+                    json_data.get('errcode', '<no errcode>'),
+                    json_data['error']))
+        return json_data
 
 
 class Location(RTTBase):

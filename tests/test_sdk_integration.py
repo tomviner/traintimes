@@ -3,7 +3,7 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
-from traintimes.sdk import Location, Service
+from traintimes.sdk import Location, Service, ResponseError
 from utils import date_in_range
 
 
@@ -20,6 +20,23 @@ def frozen_date():
     dt = datetime.datetime.combine(date, datetime.time(12, 0, 0))
     with freeze_time(dt):
         yield dt
+
+@pytest.fixture
+def past_dt(frozen_date):
+    """ Test against a known past date """
+    date = datetime.date.today() + datetime.timedelta(days=-150)
+    return datetime.datetime.combine(date, datetime.time(12, 0, 0))
+
+@pytest.fixture
+def future_dt(frozen_date):
+    """ Test against a known future date """
+    date = datetime.date.today() + datetime.timedelta(days=150)
+    return datetime.datetime.combine(date, datetime.time(12, 0, 0))
+
+@pytest.fixture
+def service_code(frozen_date):
+    return Location('HIB', 'CHX', datetime.datetime.now()) \
+        .get()['services'][0]['serviceUid']
 
 
 class TestLocation(object):
@@ -43,6 +60,16 @@ class TestLocation(object):
     def test_arrivals(self, frozen_date):
         assert Location('HIB', 'CHX', datetime.datetime.now(), True).get()
 
+    def test_before_available_window(self, past_dt):
+        with pytest.raises(ResponseError) as exc:
+            assert Location('HIB', 'CHX', past_dt).get()
+        assert exc.value.message == '501: searching outside available window'
+
+    def test_after_available_window(self, future_dt):
+        with pytest.raises(ResponseError) as exc:
+            assert Location('HIB', 'CHX', future_dt).get()
+        assert exc.value.message == '502: searching outside available window'
+
 
 class TestService(object):
     """
@@ -50,8 +77,18 @@ class TestService(object):
     """
     expected_base = 'https://api.rtt.io/api/v1/json/service/'
 
-    def test_service_date(self, frozen_date):
-        assert Service('W27124', datetime.date.today()).get()
+    def test_service_date(self, frozen_date, service_code):
+        assert Service(service_code, datetime.date.today()).get()
 
-    def test_service_datetime(self, frozen_date):
-        assert Service('W27124', datetime.datetime.now()).get()
+    def test_service_datetime(self, frozen_date, service_code):
+        assert Service(service_code, datetime.datetime.now()).get()
+
+    def test_no_schedule_found_for_far_future(self, future_dt, service_code):
+        with pytest.raises(ResponseError) as exc:
+            assert Service(service_code, future_dt).get()
+        assert exc.value.message == '<no errcode>: No schedule found'
+
+    def test_no_schedule_found_for_bad_service(self, frozen_date):
+        with pytest.raises(ResponseError) as exc:
+            assert Service('Q98765', datetime.datetime.now()).get()
+        assert exc.value.message == '<no errcode>: No schedule found'
