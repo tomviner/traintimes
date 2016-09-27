@@ -10,15 +10,16 @@ from traintimes.sdk import Location, Service
 # jq '.services | .[] | .locationDetail | "\(.gbttBookedDeparture),\(
 # .destination[0].publicTime),\(.realtimeDeparture),\(.realtimeArrival),\(
 # .destination[0].tiploc)"' | sed s/'"'//g | sed s/^/"'"/ | grep CH
-START = 'LBG'
+START = 'CST'
 DEST = 'HIB'
 
 chx_services = []
 
-for hour in range(16, 22):
+for hour in range(15, 23):
     date = datetime(2016, 3, 3, hour, 0)
     data = Location(START, DEST, date).get()
-
+    # if 'services' not in data:
+    #     import ipdb; ipdb.set_trace()
     for s in data['services']:
         chx_services.append(s['serviceUid'])
 
@@ -41,13 +42,17 @@ for service_uid in chx_services:
     parts = []
     for loc in locations:
         displays.append(loc['displayAs'])
+        d = ''
+        if loc['displayAs'] not in ('CALL', 'ORIGIN'):
+            d = loc['displayAs']
         if loc['crs'] == START:
-            parts.append(get_parts(loc))
+            parts.append(get_parts(loc)+d)
         if loc['crs'] == DEST:
             match = True
-            parts.append(get_parts(loc))
+            parts.append(get_parts(loc)+d)
     if not match:
         continue
+    print service_uid,
     if len(parts) == 2:
         print "'" + ' - '.join(parts)
     # print

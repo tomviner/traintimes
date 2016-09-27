@@ -2,7 +2,7 @@ from datetime import datetime
 # from pprint import pprint
 from collections import Counter
 
-from traintimes.sdk import Location, Service
+from traintimes.sdk import Location, Service, ResponseError
 
 
 # https://api.rtt.io/api/v1/json/search/HIB/to/CHX/2015/10/14/0800
@@ -14,85 +14,67 @@ START = 'CHX'
 DEST = 'HIB'
 # START, DEST = DEST, START
 
-chx_services = []
 
-# w1 - 1-7 sept
-# w1 - 8-14 sept
-for hour in range(19, 20):
-    date = datetime(2016, 9, 13, hour, 0)
-    print date
-    data = Location(START, DEST, date).get()
-    if not data['services']:
-        continue
-    #     import ipdb; ipdb.set_trace()
-    for s in data['services']:
-        chx_services.append(s['serviceUid'])
+def calc_lateness(book, real):
+    delta = datetime.strptime(real, '%H%M') - datetime.strptime(book, '%H%M')
+    return int(delta.seconds / 60.0)
 
-def get_parts(loc):
+def lateness_as_str(loc):
     book = loc.get('gbttBookedDeparture', '?')
     real = loc.get('realtimeDeparture', '?')
     if '?' in (book, real):
         return '{} {}'.format(book, real)
-    delta = datetime.strptime(real, '%H%M') - datetime.strptime(book, '%H%M')
-    diff_mins = delta.seconds / 60.
-    return '{} {:+3.0f}'.format(
-        book, diff_mins)
+    diff_mins = calc_lateness(book, real)
+    return '{} {:+3.0f}'.format(book, diff_mins)
+
+def lateness_as_mins(loc):
+    book = loc.get('gbttBookedDeparture', '?')
+    real = loc.get('realtimeDeparture', '?')
+    if '?' in (book, real):
+        return None
+    return calc_lateness(book, real)
+
+services = []
+
+for hour in range(12, 21):
+    date = datetime(2016, 9, 27, hour, 0)
+    print date
+    try:
+        data = Location(START, DEST, date).get()
+    except ResponseError as e:
+        print(e)
+        continue
+    if not data['services']:
+        continue
+    for s in data['services']:
+        # import json
+        # print json.dumps(s, indent=4)
+        extra = {
+            'displayAs': s['locationDetail']['displayAs'],
+            'lateness': lateness_as_mins(s['locationDetail']),
+        }
+        services.append((s['serviceUid'], extra))
+        break
 
 displays = []
-for service_uid in chx_services:
+for service_uid, extra in services:
     data = Service(service_uid, date).get()
-
     locations = data['locations']
+
     match = False
-    parts = []
-    print_detail = 1
     output = []
-    # if print_detail:
-    #     # print
-    #     output.append('')
     for loc in locations:
         displays.append(loc['displayAs'])
-        d = ''
-        if loc['displayAs'] not in ('CALL', 'ORIGIN'):
-            d = loc['displayAs']
-            # print d
-        if loc['crs'] == START:
-            parts.append(get_parts(loc) + d)
         if loc['crs'] == DEST:
             match = True
-            parts.append(get_parts(loc) + d)
-        if print_detail:
-            # print loc['crs'], get_parts(loc)
-            output.append(loc['crs'] + ' ' + get_parts(loc))
-            # if loc['crs'] == DEST:
-        # if loc['displayAs'] not in ('CALL', 'ORIGIN'):
+        output.append(loc['crs'] + ' ' + lateness_as_str(loc))
         output[-1] += '\t' + loc['displayAs']
         if match:
             break
-    # if not match:
-    #     continue
     print service_uid
-    # if len(parts) == 2:
-    #     # print "'" + ' - '.join(parts)
-    #     output.append("'" + ' - '.join(parts))
     if output:
         print '\t' + '\n\t'.join(output)
+        print extra
         print
-    # print
-    # for loc in locations[:-1]:
-    #     if loc['crs'] == DEST:
-    #         if loc['displayAs'] in ('CALL', 'ORIGIN', 'STARTS'):
-    #             parts.extend([
-    #                 loc.get('gbttBookedDeparture', '?'),
-    #                 loc.get('realtimeDeparture', '?')])
-    #         else:
-    #             parts.extend([loc.get('gbttBookedDeparture', '?'), '-'])
-    # loc = locations[-1]
-    # if loc['displayAs'] == 'DESTINATION':
-    #     parts.extend([
-    #         loc.get('realtimeArrival', '?'),
-    #         loc.get('gbttBookedArrival', '?')])
-    # if len(parts) == 4:
-    #     print "'" + ','.join(parts)
 
 print Counter(displays)
