@@ -20,11 +20,15 @@ def calc_lateness(book, real):
         datetime.datetime.strptime(real, '%H%M') -
         datetime.datetime.strptime(book, '%H%M')
     )
-    return int(delta.seconds / 60.0)
+
+    return int(delta.total_seconds() / 60.0)
 
 def lateness_as_str(loc):
     book = loc.get('gbttBookedDeparture', '?')
     real = loc.get('realtimeDeparture', '?')
+    if '?' in (book, real):
+        book = loc.get('gbttBookedArrival', '?')
+        real = loc.get('realtimeArrival', '?')
     if '?' in (book, real):
         return '{} {}'.format(book, real)
     diff_mins = calc_lateness(book, real)
@@ -33,6 +37,9 @@ def lateness_as_str(loc):
 def lateness_as_mins(loc):
     book = loc.get('gbttBookedDeparture', '?')
     real = loc.get('realtimeDeparture', '?')
+    if '?' in (book, real):
+        book = loc.get('gbttBookedArrival', '?')
+        real = loc.get('realtimeArrival', '?')
     if '?' in (book, real):
         return None
     return calc_lateness(book, real)
@@ -113,16 +120,21 @@ for service_uid, extra in services:
     started = False
     match = False
     output = []
+    delay_lines = []
     for loc in locations:
         displays.append(loc['displayAs'])
         started = started or loc['crs'] in (START, DEST)
         if not started:
             continue
-        if loc['crs'] == DEST:
-            output.append(' '*30 + 'x' * (lateness_as_mins(loc) or 0))
-            match = True
+        if loc['crs'] in (START, DEST):
+            # import ipdb; ipdb.set_trace()
+            ch = {START: '>', DEST: '.'}[loc['crs']]
+            delay_lines.append(' '*30 + ch * (lateness_as_mins(loc) or 0))
         output.append(loc['crs'] + ' ' + lateness_as_str(loc))
         output[-1] += '\t' + loc['displayAs']
+        if loc['crs'] == DEST:
+            match = True
+            output.extend(delay_lines)
         # output[-1] += '\t' + loc['gbttBookedDeparture']
         if match:
             break
