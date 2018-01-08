@@ -1,19 +1,30 @@
 import datetime
+import json
+import sys
 # from pprint import pprint
 from collections import Counter
 
-from traintimes.sdk import Location, Service, ResponseError
-
+from traintimes.sdk import Location, ResponseError, Service
 
 # https://api.rtt.io/api/v1/json/search/HIB/to/CHX/2015/10/14/0800
 
 # jq '.services | .[] | .locationDetail | "\(.gbttBookedDeparture),\(
 # .destination[0].publicTime),\(.realtimeDeparture),\(.realtimeArrival),\(
 # .destination[0].tiploc)"' | sed s/'"'//g | sed s/^/"'"/ | grep CH
+args = sys.argv[1:]
+
 START = 'CHX'
 DEST = 'HIB'
-# START, DEST = DEST, START
 
+rev = False
+if 'rev' in args:
+    args.remove('rev')
+    rev = True
+
+hours = range(18, 24)
+if rev:
+    START, DEST = DEST, START
+    hours = range(5, 11)
 
 def calc_lateness(book, real):
     delta = (
@@ -46,16 +57,15 @@ def lateness_as_mins(loc):
 
 
 services = []
-import sys
 
 one_day = datetime.timedelta(days=1)
-args = sys.argv[1:]
 today = datetime.date.today()
 
 date = today
 if args:
     day = args[0]
     day = int(day)
+    # count backwards from today, to find the most recent `day`th of the month
     for i in range(31 * 2):
         date = today - (i * one_day)
         if date.day == day:
@@ -75,7 +85,8 @@ bad_dest = [
     'RCHT', 'ASHFKY-RAMSGTE', 'NBCKNHM', 'HTHRGRN',
 ]
 ds = []
-for hour in range(17, 22):
+seen = []
+for hour in hours:
     dt = datetime.datetime.combine(date, datetime.time(hour))
     print dt
     try:
@@ -92,15 +103,14 @@ for hour in range(17, 22):
         if das in bad_dest:
             continue
         ds.append(das)
-        import json
         print json.dumps(s, indent=4)
-        # if '1722' in str(s):
-        #     sys.exit()
         extra = {
             'displayAs': s['locationDetail']['displayAs'],
             'lateness': lateness_as_mins(s['locationDetail']),
         }
-        services.append((s['serviceUid'], extra))
+        if s['serviceUid'] not in seen:
+            services.append((s['serviceUid'], extra))
+            seen.append(s['serviceUid'])
 print map(str, Counter(ds).keys())
 # sys.exit()
 displays = []
@@ -121,6 +131,7 @@ for service_uid, extra in services:
     match = False
     output = []
     delay_lines = []
+    late = False
     for loc in locations:
         displays.append(loc['displayAs'])
         started = started or loc['crs'] in (START, DEST)
@@ -129,7 +140,10 @@ for service_uid, extra in services:
         if loc['crs'] in (START, DEST):
             # import ipdb; ipdb.set_trace()
             ch = {START: '>', DEST: '.'}[loc['crs']]
-            delay_lines.append(' '*30 + ch * (lateness_as_mins(loc) or 0))
+            lateness = lateness_as_mins(loc) or 0
+            # print loc['crs'], lateness_as_mins(loc), late or lateness > 15
+            late = late or lateness > 30
+            delay_lines.append(' '*30 + ch * lateness)
         output.append(loc['crs'] + ' ' + lateness_as_str(loc))
         output[-1] += '\t' + loc['displayAs']
         if loc['crs'] == DEST:
@@ -139,7 +153,7 @@ for service_uid, extra in services:
         if match:
             break
     print service_uid
-    if output:
+    if output and late:
         print '\t' + '\n\t'.join(output)
         print extra
         print

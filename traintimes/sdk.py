@@ -37,7 +37,7 @@ class RTTBase(object):
 
     def get(self):
         print self
-        response = requests.get(self.uri, auth=self.auth)
+        response = requests.get(self.uri, auth=self.auth, verify=False)
         assert response.ok, response
         json_data = response.json()
         if 'error' in json_data:
