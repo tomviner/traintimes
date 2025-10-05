@@ -1,6 +1,6 @@
-.. image:: https://travis-ci.org/tomviner/traintimes.svg
-        :target: https://travis-ci.org/tomviner/traintimes
-        :alt: Build Status
+.. image:: https://github.com/tomviner/traintimes/actions/workflows/ci.yml/badge.svg?branch=main
+        :target: https://github.com/tomviner/traintimes/actions/workflows/ci.yml
+        :alt: CI Status
 
 .. image:: https://coveralls.io/repos/tomviner/traintimes/badge.svg?branch=master&service=github
         :target: https://coveralls.io/github/tomviner/traintimes?branch=master
@@ -14,31 +14,32 @@ A Python SDK for `realtimetrains <http://www.realtimetrains.co.uk/>`_' API `api.
 Development setup
 -----------------
 
-The project now targets Python 3.  You can create a virtual environment and
-install the dependencies using `uv <https://github.com/astral-sh/uv>`_::
+The project is managed with `uv <https://github.com/astral-sh/uv>`_.  To create
+an isolated environment with the runtime and development dependencies run::
 
-    uv venv --python 3.11 .venv
-    source .venv/bin/activate
-    uv pip install -e .
-    uv pip install pytest pytest-cov freezegun
+    uv sync --dev
+
+This will create ``.venv`` (if it does not already exist) and install the
+package along with the test tools declared in ``pyproject.toml``.
 
 The SDK requires access to the RealTimeTrains API.  Obtain credentials from
 https://api.rtt.io/ and expose them to the process in the
-``RTT_AUTH`` environment variable, formatted as ``username:password``.
+``RTT_AUTH`` environment variable, formatted as ``username:password``.  When the
+variable is not defined the test suite substitutes a placeholder so that unit
+tests can be executed offline; the integration suite is skipped in that case.
 
 Running the test suite
 ----------------------
 
 With the dependencies installed you can execute the unit tests via::
 
-    pytest
+    uv run pytest
 
 The integration tests in ``tests/test_sdk_integration.py`` make live requests
 against the RealTimeTrains API.  They count against the daily free tier limit
-and therefore require valid ``RTT_AUTH`` credentials.  When running in an
-environment without outbound network access, or without API credentials, the
-tests will fail during collection because their dependencies (``requests``,
-``requests-cache`` and ``freezegun``) cannot be installed.
+and therefore require valid ``RTT_AUTH`` credentials.  Without credentials the
+integration suite is skipped automatically; provide real values to exercise the
+live API calls.
 
 
 SDK Classes

@@ -1,10 +1,20 @@
 import datetime
+import os
 
 import pytest
 from freezegun import freeze_time
 
 from traintimes.sdk import Location, Service, ResponseError
 from utils import date_in_range
+
+
+_PLACEHOLDER_AUTH = "demo:demo"
+
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get("RTT_AUTH") == _PLACEHOLDER_AUTH,
+    reason="Integration tests require valid RTT_AUTH credentials",
+)
 
 
 @pytest.yield_fixture
