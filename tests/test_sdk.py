@@ -6,7 +6,7 @@ from freezegun import freeze_time
 from traintimes.sdk import Location, Service
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def dt():
     with freeze_time("2015-10-16 21:52:00"):
         yield
