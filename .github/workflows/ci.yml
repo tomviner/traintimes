@@ -20,4 +20,4 @@ jobs:
       - name: Run tests
         env:
           RTT_AUTH: ${{ secrets.RTT_AUTH }}
-        run: uv run pytest
+        run: uv run --group test pytest

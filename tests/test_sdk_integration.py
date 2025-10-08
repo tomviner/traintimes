@@ -17,7 +17,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def frozen_date():
     """ Test against a known, rarely changing date, within range.
 
@@ -56,7 +56,7 @@ class TestLocation(object):
     expected_base = 'https://api.rtt.io/api/v1/json/search/'
 
     def assert_valid_location(self, data):
-        assert data.viewkeys() == {'location', 'filter', 'services'}
+        assert set(data) == {'location', 'filter', 'services'}
 
     def test_station(self):
         self.assert_valid_location(Location('HIB').get())
@@ -111,7 +111,7 @@ class TestService(object):
             'trainIdentity'
         }
         # every key must be in the data
-        assert minimal_service_keys.issubset(data.viewkeys())
+        assert minimal_service_keys.issubset(data.keys())
 
     def test_service_date(self, frozen_date, service_code):
         self.assert_valid_service(
