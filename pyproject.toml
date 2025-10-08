@@ -19,6 +19,7 @@ Homepage = "https://github.com/tomviner/traintimes"
 [dependency-groups]
 test = [
   "freezegun==0.3.5",
+  "requests-mock",
   "pytest",
   "pytest-cov",
 ]

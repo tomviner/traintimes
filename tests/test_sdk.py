@@ -3,7 +3,7 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
-from traintimes.sdk import Location, Service
+from traintimes.sdk import Location, ResponseError, Service
 
 
 @pytest.fixture
@@ -53,3 +53,26 @@ class TestService(object):
     def test_service_datetime(self, dt):
         assert Service('W12345', datetime.datetime.now()).uri == \
             self.expected_base + 'W12345/2015/10/16'
+
+
+def test_get_raises_response_error(requests_mock):
+    subject = Location('HIB')
+    adapter = requests_mock.get(
+        subject.uri,
+        json={'error': 'failure message', 'errcode': 'E_TEST'},
+    )
+
+    with pytest.raises(ResponseError) as excinfo:
+        subject.get()
+
+    assert str(excinfo.value) == 'E_TEST: failure message'
+    assert adapter.called
+    assert requests_mock.last_request.url == subject.uri
+
+
+def test_get_returns_json_payload(requests_mock):
+    subject = Location('HIB')
+    expected_payload = {'success': True}
+    requests_mock.get(subject.uri, json=expected_payload)
+
+    assert subject.get() == expected_payload
