@@ -1,16 +1,12 @@
-[build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "traintimes"
-version = "0.1.0.dev0"
 description = "A Python SDK for realtimetrains' API"
+version = "0.1.0.dev0"
 readme = "README.rst"
+requires-python = ">=3.10"
 authors = [
   { name = "Tom Viner", email = "traintimes@viner.tv" },
 ]
-requires-python = ">=3.8"
 dependencies = [
   "purl>=1.1,<2",
   "requests>=2.31,<3",
@@ -20,9 +16,45 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/tomviner/traintimes"
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+test = [
+  "freezegun==0.3.5",
   "pytest",
   "pytest-cov",
-  "freezegun==0.3.5",
 ]
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.ruff]
+target-version = "py310"
+force-exclude = true
+exclude = [".venv"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "W",
+  "F",
+  "I",
+  "C90",
+  "T10",
+]
+
+[tool.ruff.format]
+quote-style = "preserve"
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+precision = 1
