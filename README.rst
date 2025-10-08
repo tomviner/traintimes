@@ -33,7 +33,7 @@ Running the test suite
 
 With the dependencies installed you can execute the unit tests via::
 
-    uv run pytest
+    uv run --group test pytest
 
 The integration tests in ``tests/test_sdk_integration.py`` make live requests
 against the RealTimeTrains API.  They count against the daily free tier limit
