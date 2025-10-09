@@ -6,7 +6,14 @@ import requests
 from purl import Template
 
 class ResponseError(Exception):
-    pass
+    """Raised when the RealTimeTrains API responds with an error payload."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        # Many callers, including the integration tests, expect a ``message``
+        # attribute that mirrors the exception string.  Preserve that legacy
+        # behaviour so accessing ``exc.value.message`` keeps working.
+        self.message = message
 
 class RTTBase(object):
     """ Base Class for RealTimeTrains API
@@ -38,13 +45,26 @@ class RTTBase(object):
     def get(self):
         print(self)
         response = requests.get(self.uri, auth=self.auth, verify=False)
-        assert response.ok, response
-        json_data = response.json()
-        if 'error' in json_data:
+
+        def _error_from_payload(payload):
+            return '{}: {}'.format(
+                payload.get('errcode', '<no errcode>'),
+                payload['error'])
+
+        try:
+            json_data = response.json()
+        except ValueError:
+            json_data = None
+
+        if not response.ok:
+            if isinstance(json_data, dict) and 'error' in json_data:
+                raise ResponseError(_error_from_payload(json_data))
             raise ResponseError(
-                '{}: {}'.format(
-                    json_data.get('errcode', '<no errcode>'),
-                    json_data['error']))
+                '{}: {}'.format(response.status_code, response.reason))
+
+        if isinstance(json_data, dict) and 'error' in json_data:
+            raise ResponseError(_error_from_payload(json_data))
+
         return json_data
 
 
