@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+import requests_mock
 from freezegun import freeze_time
 
 from traintimes.sdk import Location, ResponseError, Service
@@ -55,24 +56,27 @@ class TestService(object):
             self.expected_base + 'W12345/2015/10/16'
 
 
-def test_get_raises_response_error(requests_mock):
+def test_get_raises_response_error():
     subject = Location('HIB')
-    adapter = requests_mock.get(
-        subject.uri,
-        json={'error': 'failure message', 'errcode': 'E_TEST'},
-    )
+    with requests_mock.Mocker() as mocker:
+        adapter = mocker.get(
+            subject.uri,
+            json={'error': 'failure message', 'errcode': 'E_TEST'},
+        )
 
-    with pytest.raises(ResponseError) as excinfo:
-        subject.get()
+        with pytest.raises(ResponseError) as excinfo:
+            subject.get()
 
-    assert str(excinfo.value) == 'E_TEST: failure message'
-    assert adapter.called
-    assert requests_mock.last_request.url == subject.uri
+        assert str(excinfo.value) == 'E_TEST: failure message'
+        assert adapter.called
+        assert mocker.last_request.url == subject.uri
 
 
-def test_get_returns_json_payload(requests_mock):
+def test_get_returns_json_payload():
     subject = Location('HIB')
     expected_payload = {'success': True}
-    requests_mock.get(subject.uri, json=expected_payload)
 
-    assert subject.get() == expected_payload
+    with requests_mock.Mocker() as mocker:
+        mocker.get(subject.uri, json=expected_payload)
+
+        assert subject.get() == expected_payload
