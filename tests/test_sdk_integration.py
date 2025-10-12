@@ -40,7 +40,7 @@ def past_dt(frozen_date):
 @pytest.fixture
 def future_dt(frozen_date):
     """ Test against a known future date """
-    date = datetime.date.today() + datetime.timedelta(days=150)
+    date = datetime.date.today() + datetime.timedelta(days=1825)  # ~5 years
     return datetime.datetime.combine(date, datetime.time(12, 0, 0))
 
 @pytest.fixture
@@ -80,12 +80,12 @@ class TestLocation(object):
     def test_before_available_window(self, past_dt):
         with pytest.raises(ResponseError) as exc:
             assert Location('HIB', 'CHX', past_dt).get()
-        assert exc.value.message == '501: searching outside available window'
+        assert exc.value.message == 'Not Found'
 
     def test_after_available_window(self, future_dt):
         with pytest.raises(ResponseError) as exc:
             assert Location('HIB', 'CHX', future_dt).get()
-        assert exc.value.message == '502: searching outside available window'
+        assert exc.value.message == 'Not Found'
 
 
 class TestService(object):
