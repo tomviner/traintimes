@@ -60,4 +60,4 @@ skip_covered = true
 precision = 1
 
 [tool.pytest.ini_options]
-addopts = "--cov-report term-missing --cov traintimes/sdk.py"
+addopts = "--cov-report term-missing --cov traintimes"
