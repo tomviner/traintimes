@@ -37,12 +37,12 @@ exclude = [".venv"]
 
 [tool.ruff.lint]
 select = [
-  "E",
-  "W",
-  "F",
-  "I",
-  "C90",
-  "T10",
+  "E",  # pycodestyle Error
+  "W",  # pycodestyle Warning
+  "F",  # Pyflakes
+  "I",  # isort
+  "C90",  # mccabe (code complexity)
+  "T10",  # flake8-debugger
 ]
 
 [tool.ruff.format]
@@ -58,3 +58,6 @@ branch = true
 show_missing = true
 skip_covered = true
 precision = 1
+
+[tool.pytest.ini_options]
+addopts = "--cov-report term-missing --cov traintimes/sdk.py"
