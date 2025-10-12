@@ -6,7 +6,9 @@ import requests
 from purl import Template
 
 class ResponseError(Exception):
-    pass
+    def __init__(self, message):
+        self.message = message
+        super().__init__(message)
 
 class RTTBase(object):
     """ Base Class for RealTimeTrains API
@@ -38,8 +40,21 @@ class RTTBase(object):
     def get(self):
         print(self)
         response = requests.get(self.uri, auth=self.auth, verify=False)
-        assert response.ok, response
-        json_data = response.json()
+        if not response.ok:
+            try:
+                json_data = response.json()
+            except ValueError:
+                raise ResponseError(response.reason)
+            if 'error' in json_data:
+                raise ResponseError(
+                    '{}: {}'.format(
+                        json_data.get('errcode', '<no errcode>'),
+                        json_data['error']))
+
+        try:
+            json_data = response.json()
+        except ValueError:
+            raise ResponseError(f'{response.text=}')
         if 'error' in json_data:
             raise ResponseError(
                 '{}: {}'.format(

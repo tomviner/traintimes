@@ -79,13 +79,13 @@ class TestLocation(object):
 
     def test_before_available_window(self, past_dt):
         with pytest.raises(ResponseError) as exc:
-            assert Location('HIB', 'CHX', past_dt).get()
-        assert exc.value.message == '501: searching outside available window'
+            assert Location('HGS', 'RYEE', past_dt).get()
+        assert exc.value.message == 'Not Found'
 
     def test_after_available_window(self, future_dt):
         with pytest.raises(ResponseError) as exc:
-            assert Location('HIB', 'CHX', future_dt).get()
-        assert exc.value.message == '502: searching outside available window'
+            assert Location('HGS', 'RYEE', future_dt).get()
+        assert exc.value.message == 'Not Found'
 
 
 class TestService(object):
