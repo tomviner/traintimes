@@ -10,7 +10,7 @@ class ResponseError(Exception):
         self.message = message
         super().__init__(message)
 
-class RTTBase(object):
+class RTTBase:
     """ Base Class for RealTimeTrains API
 
     See http://www.realtimetrains.co.uk/api
@@ -38,8 +38,7 @@ class RTTBase(object):
         return self.uri
 
     def get(self):
-        print(self)
-        response = requests.get(self.uri, auth=self.auth, verify=False)
+        response = requests.get(self.uri, auth=self.auth)
         if not response.ok:
             try:
                 json_data = response.json()
@@ -50,6 +49,8 @@ class RTTBase(object):
                     '{}: {}'.format(
                         json_data.get('errcode', '<no errcode>'),
                         json_data['error']))
+            # If we got here, response is not OK but no 'error' key in JSON
+            raise ResponseError(f'{response.status_code}: {response.reason}')
 
         try:
             json_data = response.json()
