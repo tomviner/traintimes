@@ -8,11 +8,11 @@ from traintimes.sdk import Location, Service
 
 @pytest.fixture
 def dt():
-    with freeze_time("2015-10-16 21:52:00"):
+    with freeze_time("2025-10-16 21:52:00"):
         yield
 
 
-class TestLocation(object):
+class TestLocation:
     """
     /(json|xml)/search/<station>/<year>/<month>/<day>/<time>/arrivals
     """
@@ -29,18 +29,18 @@ class TestLocation(object):
 
     def test_date(self, dt):
         assert Location('HIB', 'CHX', datetime.date.today()).uri == \
-            self.expected_base + 'HIB/to/CHX/2015/10/16'
+            self.expected_base + 'HIB/to/CHX/2025/10/16'
 
     def test_time(self, dt):
         assert Location('HIB', 'CHX', datetime.datetime.now()).uri == \
-            self.expected_base + 'HIB/to/CHX/2015/10/16/2152'
+            self.expected_base + 'HIB/to/CHX/2025/10/16/2152'
 
     def test_arrivals(self, dt):
         assert Location('HIB', 'CHX', datetime.datetime.now(), True).uri == \
-            self.expected_base + 'HIB/to/CHX/2015/10/16/2152/arrivals'
+            self.expected_base + 'HIB/to/CHX/2025/10/16/2152/arrivals'
 
 
-class TestService(object):
+class TestService:
     """
     /(json|xml)/service/<serviceUid>/<year>/<month>/<day>
     """
@@ -48,8 +48,8 @@ class TestService(object):
 
     def test_service_date(self, dt):
         assert Service('W12345', datetime.date.today()).uri == \
-            self.expected_base + 'W12345/2015/10/16'
+            self.expected_base + 'W12345/2025/10/16'
 
     def test_service_datetime(self, dt):
         assert Service('W12345', datetime.datetime.now()).uri == \
-            self.expected_base + 'W12345/2015/10/16'
+            self.expected_base + 'W12345/2025/10/16'

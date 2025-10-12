@@ -49,7 +49,7 @@ def service_code(frozen_date):
         .get()['services'][0]['serviceUid']
 
 
-class TestLocation(object):
+class TestLocation:
     """
     /(json|xml)/search/<station>/<year>/<month>/<day>/<time>/arrivals
     """
@@ -88,7 +88,7 @@ class TestLocation(object):
         assert exc.value.message == 'Not Found'
 
 
-class TestService(object):
+class TestService:
     """
     /(json|xml)/service/<serviceUid>/<year>/<month>/<day>
     """
