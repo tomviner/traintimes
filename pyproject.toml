@@ -54,11 +54,13 @@ lines-after-imports = 2
 
 [tool.coverage.run]
 branch = true
+source = ["traintimes"]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
 precision = 1
+fail_under = 100
 
 [tool.pytest.ini_options]
-addopts = "--cov-report term-missing --cov traintimes"
+addopts = "--cov"
