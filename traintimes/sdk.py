@@ -49,6 +49,8 @@ class RTTBase:
                     '{}: {}'.format(
                         json_data.get('errcode', '<no errcode>'),
                         json_data['error']))
+            # If we got here, response is not OK but no 'error' key in JSON
+            raise ResponseError(f'{response.status_code}: {response.reason}')
 
         try:
             json_data = response.json()

@@ -3,7 +3,7 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
-from traintimes.sdk import Location, Service
+from traintimes.sdk import Location, ResponseError, Service
 
 
 @pytest.fixture
@@ -53,3 +53,48 @@ class TestService:
     def test_service_datetime(self, dt):
         assert Service('W12345', datetime.datetime.now()).uri == \
             self.expected_base + 'W12345/2025/10/16'
+
+
+class TestErrorHandling:
+    """Test error scenarios in the get() method"""
+
+    def test_non_ok_response_with_json_error(self, requests_mock):
+        """Test handling of non-OK response with JSON error payload"""
+        subject = Location('HIB')
+        requests_mock.get(
+            subject.uri,
+            json={'error': 'Service unavailable', 'errcode': '503'},
+            status_code=503
+        )
+        with pytest.raises(ResponseError) as exc:
+            subject.get()
+        assert exc.value.message == '503: Service unavailable'
+
+    def test_non_ok_response_with_non_json(self, requests_mock):
+        """Test handling of non-OK response with non-JSON body"""
+        subject = Location('HIB')
+        requests_mock.get(subject.uri, text='<html>Error</html>', status_code=404, reason='Not Found')
+        with pytest.raises(ResponseError) as exc:
+            subject.get()
+        assert exc.value.message == 'Not Found'
+
+    def test_non_ok_response_with_json_but_no_error_key(self, requests_mock):
+        """Test handling of non-OK response with JSON but no error key"""
+        subject = Location('HIB')
+        requests_mock.get(
+            subject.uri,
+            json={'message': 'Something went wrong'},
+            status_code=500,
+            reason='Internal Server Error'
+        )
+        with pytest.raises(ResponseError) as exc:
+            subject.get()
+        assert exc.value.message == '500: Internal Server Error'
+
+    def test_ok_response_with_invalid_json(self, requests_mock):
+        """Test handling of OK response with invalid JSON"""
+        subject = Location('HIB')
+        requests_mock.get(subject.uri, text='<html>Not JSON</html>', status_code=200)
+        with pytest.raises(ResponseError) as exc:
+            subject.get()
+        assert 'response.text=' in exc.value.message
