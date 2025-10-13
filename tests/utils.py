@@ -2,8 +2,7 @@ import datetime
 
 
 def date_in_range(backward=7, forward=90):
-    """ Find a date within -7 to +90 days from current date.
-    """
+    """Find a date within -7 to +90 days from current date."""
     today = datetime.date.today()
     day = datetime.timedelta(days=1)
     start = today - backward * day

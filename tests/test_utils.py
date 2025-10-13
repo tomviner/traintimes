@@ -12,6 +12,7 @@ def frozen_date_over_year(request):
     with freeze_time(dt):
         yield dt
 
+
 def test_date_in_range(frozen_date_over_year):
     delta = date_in_range() - frozen_date_over_year
     assert datetime.timedelta(days=-7) < delta < datetime.timedelta(days=90)

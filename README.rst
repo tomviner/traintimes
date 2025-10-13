@@ -8,7 +8,7 @@
 
 traintimes
 ==========
-A Python SDK for `realtimetrains <http://www.realtimetrains.co.uk/>`_' API `api.rtt.io <https://api.rtt.io/>`_ (`docs <http://www.realtimetrains.co.uk/api>`_)
+A Python SDK for `realtimetrains <http://www.realtimetrains.co.uk/>`_' API `api.rtt.io <https://api.rtt.io/>`_ (`docs <https://www.realtimetrains.co.uk/about/developer/pull/docs/>`_)
 
 
 Development setup

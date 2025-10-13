@@ -5,20 +5,23 @@ import requests
 
 from purl import Template
 
+
 class ResponseError(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
 
-class RTTBase:
-    """ Base Class for RealTimeTrains API
 
-    See http://www.realtimetrains.co.uk/api
+class RTTBase:
+    """Base Class for RealTimeTrains API
+
+    See https://www.realtimetrains.co.uk/about/developer/pull/docs/
 
     Apply for API access at https://api.rtt.io/
     Set environ variable:
         export RTT_AUTH=user:password
     """
+
     # URI template language as per RFC6570
     base_uri_template = 'https://api.rtt.io/api/{version}/{accept}'
     auth = tuple(os.environ['RTT_AUTH'].split(':'))
@@ -47,8 +50,9 @@ class RTTBase:
             if 'error' in json_data:
                 raise ResponseError(
                     '{}: {}'.format(
-                        json_data.get('errcode', '<no errcode>'),
-                        json_data['error']))
+                        json_data.get('errcode', '<no errcode>'), json_data['error']
+                    )
+                )
             # If we got here, response is not OK but no 'error' key in JSON
             raise ResponseError(f'{response.status_code}: {response.reason}')
 
@@ -59,23 +63,35 @@ class RTTBase:
         if 'error' in json_data:
             raise ResponseError(
                 '{}: {}'.format(
-                    json_data.get('errcode', '<no errcode>'),
-                    json_data['error']))
+                    json_data.get('errcode', '<no errcode>'), json_data['error']
+                )
+            )
         return json_data
 
 
 class Location(RTTBase):
-    """ Location List API
+    """Location List API
 
-    http://www.realtimetrains.co.uk/api/pull/locationlist
-    /(json|xml)/search/<station>/<year>/<month>/<day>/<time>/arrivals
+    Endpoints:
+    - Normal queries (live departures):
+      /json/search/<station>
+    - Normal queries filtered to a location:
+      /json/search/<station>/to/<toStation>
+    - Queries for all services on a specific date:
+      /json/search/<station>/<year>/<month>/<day>
+    - Queries for services on a specific date and time:
+      /json/search/<station>/<year>/<month>/<day>/<time>
+
+    You can append /arrivals to any of these endpoints to retrieve info about arrivals.
+    You can apply the to/from filtering to any of the endpoints, they must be before
+    any date/time modifiers.
+
+    See: https://www.realtimetrains.co.uk/about/developer/pull/docs/locationlist/
     """
 
     uri_template = '/search/{station}{+tostation}{+date}{+time}{/arrivals}'
 
-    def __init__(
-            self, station, to_station=None, when=None, arrivals=False,
-            **kwargs):
+    def __init__(self, station, to_station=None, when=None, arrivals=False, **kwargs):
         super(Location, self).__init__(**kwargs)
 
         self.add_to_context('station', station)
@@ -96,8 +112,14 @@ class Location(RTTBase):
 class Service(RTTBase):
     """Service Information API
 
-    http://www.realtimetrains.co.uk/api/pull/serviceinfo
-    /(json|xml)/service/<serviceUid>/<year>/<month>/<day>
+    Endpoint:
+    /json/service/<serviceUid>/<year>/<month>/<day>
+
+    Parameters:
+    - serviceUid (required): Service UID, as obtained from a location search
+    - date (required): In format yyyy/mm/dd, example: 2013/06/14
+
+    See: https://www.realtimetrains.co.uk/about/developer/pull/docs/serviceinfo/
     """
 
     uri_template = '/service{/service}{+date}'
@@ -107,6 +129,7 @@ class Service(RTTBase):
 
         self.add_to_context('service', service)
 
-        assert isinstance(date, datetime.date), \
-            "Expected {} got {}".format(datetime.date, type(date))
+        assert isinstance(date, datetime.date), "Expected {} got {}".format(
+            datetime.date, type(date)
+        )
         self.add_to_context('date', '/{0:%Y}/{0:%m}/{0:%d}'.format(date))
