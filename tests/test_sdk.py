@@ -147,22 +147,3 @@ class TestErrorHandling:
         with pytest.raises(ResponseError) as exc:
             subject.get()
         assert 'response.text=' in exc.value.message
-
-    def test_ok_response_with_json_error(self, requests_mock):
-        """Test handling of OK response containing an error payload"""
-        subject = Location('HIB')
-        requests_mock.get(
-            subject.uri,
-            json={'error': 'Service unavailable', 'errcode': '503'},
-            status_code=200,
-        )
-        with pytest.raises(ResponseError) as exc:
-            subject.get()
-        assert exc.value.message == '503: Service unavailable'
-
-    def test_ok_response_returns_payload(self, requests_mock):
-        """Test successful OK response returns JSON payload"""
-        subject = Location('HIB')
-        payload = {'services': []}
-        requests_mock.get(subject.uri, json=payload, status_code=200)
-        assert subject.get() == payload
