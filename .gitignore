@@ -1,5 +1,6 @@
 .requests_cache
 *cache.sqlite
+.env
 
 
 # Byte-compiled / optimized / DLL files

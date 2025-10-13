@@ -8,9 +8,10 @@ authors = [
   { name = "Tom Viner", email = "traintimes@viner.tv" },
 ]
 dependencies = [
-  "purl>=1.1,<2",
-  "requests>=2.31,<3",
-  "requests-cache>=1.2,<2",
+  "purl>=1.1",
+  "requests>=2.31",
+  "requests-cache>=1.2",
+  "python-dotenv>=1",
 ]
 
 [project.urls]
@@ -18,7 +19,7 @@ Homepage = "https://github.com/tomviner/traintimes"
 
 [dependency-groups]
 test = [
-  "freezegun==0.3.5",
+  "freezegun",
   "pytest",
   "pytest-cov",
   "requests-mock",

@@ -1,12 +1,10 @@
 """Pytest configuration helpers."""
 
 import logging
-import os
 
-PLACEHOLDER_AUTH = "demo:demo"
+from dotenv import load_dotenv
 
-
-os.environ.setdefault("RTT_AUTH", PLACEHOLDER_AUTH)
+load_dotenv()
 
 
 logging.basicConfig(level=logging.DEBUG)

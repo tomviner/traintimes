@@ -8,11 +8,8 @@ from traintimes.sdk import Location, Service, ResponseError
 from utils import date_in_range
 
 
-_PLACEHOLDER_AUTH = "demo:demo"
-
-
 pytestmark = pytest.mark.skipif(
-    os.environ.get("RTT_AUTH") == _PLACEHOLDER_AUTH,
+    "RTT_AUTH" not in os.environ,
     reason="Integration tests require valid RTT_AUTH credentials",
 )
 
