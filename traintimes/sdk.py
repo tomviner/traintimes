@@ -2,7 +2,7 @@ import datetime
 import os
 
 import requests
-
+from dotenv import load_dotenv
 from purl import Template
 
 
@@ -10,6 +10,9 @@ class ResponseError(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(message)
+
+
+load_dotenv()
 
 
 class RTTBase:

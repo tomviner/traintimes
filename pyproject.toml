@@ -11,6 +11,7 @@ dependencies = [
   "purl>=1.1,<2",
   "requests>=2.31,<3",
   "requests-cache>=1.2,<2",
+  "python-dotenv>=1,<2",
 ]
 
 [project.urls]
