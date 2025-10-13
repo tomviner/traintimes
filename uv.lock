@@ -225,15 +225,14 @@ wheels = [
 
 [[package]]
 name = "freezegun"
-version = "0.3.5"
+version = "1.5.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-dateutil" },
-    { name = "six" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/50/55/aacc178fb4717a8d499e6f2c30efa5d4400d4c59523388102dd0909d8f87/freezegun-0.3.5.tar.gz", hash = "sha256:ee59b2eedd4011eeaae8a95eec31aa977ec355df7f4eca1067f402cb79429e0a", size = 43439, upload-time = "2015-08-06T13:43:59.321Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/95/dd/23e2f4e357f8fd3bdff613c1fe4466d21bfb00a6177f238079b17f7b1c84/freezegun-1.5.5.tar.gz", hash = "sha256:ac7742a6cc6c25a2c35e9292dfd554b897b517d2dec26891a2e8debf205cb94a", size = 35914, upload-time = "2025-08-09T10:39:08.338Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/d7/e80db92b2d62ff5002eacae9b3c4e28d5a267c4e6746eb85ca727341a002/freezegun-0.3.5-py2.py3-none-any.whl", hash = "sha256:c786573c48fbdde8e50e555e5e25a836443e666d6ccff6cb0d2008615358b0e3", size = 5739, upload-time = "2015-08-06T13:44:02.499Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/2e/b41d8a1a917d6581fc27a35d05561037b048e47df50f27f8ac9c7e27a710/freezegun-1.5.5-py3-none-any.whl", hash = "sha256:cd557f4a75cf074e84bc374249b9dd491eaeacd61376b9eb3c423282211619d2", size = 19266, upload-time = "2025-08-09T10:39:06.636Z" },
 ]
 
 [[package]]
@@ -478,15 +477,15 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "purl", specifier = ">=1.1,<2" },
-    { name = "python-dotenv", specifier = ">=1,<2" },
-    { name = "requests", specifier = ">=2.31,<3" },
-    { name = "requests-cache", specifier = ">=1.2,<2" },
+    { name = "purl", specifier = ">=1.1" },
+    { name = "python-dotenv", specifier = ">=1" },
+    { name = "requests", specifier = ">=2.31" },
+    { name = "requests-cache", specifier = ">=1.2" },
 ]
 
 [package.metadata.requires-dev]
 test = [
-    { name = "freezegun", specifier = "==0.3.5" },
+    { name = "freezegun" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "requests-mock" },
