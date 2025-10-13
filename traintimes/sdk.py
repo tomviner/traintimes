@@ -15,7 +15,7 @@ class ResponseError(Exception):
 class RTTBase:
     """Base Class for RealTimeTrains API
 
-    See http://www.realtimetrains.co.uk/api
+    See https://www.realtimetrains.co.uk/about/developer/pull/docs/
 
     Apply for API access at https://api.rtt.io/
     Set environ variable:
