@@ -3,9 +3,10 @@ import os
 
 import pytest
 from freezegun import freeze_time
-
-from traintimes.sdk import Location, Service, ResponseError
 from utils import date_in_range
+
+from traintimes.models import LocationResponse, ServiceResponse
+from traintimes.sdk import Location, ResponseError, Service
 
 
 pytestmark = pytest.mark.skipif(
@@ -45,9 +46,7 @@ def future_dt(frozen_date):
 
 @pytest.fixture
 def service_code(frozen_date):
-    return Location('HIB', 'CHX', datetime.datetime.now()).get()['services'][0][
-        'serviceUid'
-    ]
+    return Location('HIB', 'CHX', datetime.datetime.now()).get().services[0].service_uid
 
 
 class TestLocation:
@@ -56,18 +55,26 @@ class TestLocation:
     expected_base = 'https://api.rtt.io/api/v1/json/search/'
 
     def assert_valid_location(self, data):
-        assert set(data) == {'location', 'filter', 'services'}
+        assert isinstance(data, LocationResponse)
+        assert data.location.name
+        assert isinstance(data.services, list)
 
     def test_station_only(self):
         """Normal queries (live departures): /json/search/<station>"""
         self.assert_valid_location(Location('HIB').get())
 
     def test_station_with_to_station(self):
-        """Normal queries filtered to a location: /json/search/<station>/to/<toStation>"""
+        """Normal queries filtered to a location.
+
+        Endpoint: /json/search/<station>/to/<toStation>
+        """
         self.assert_valid_location(Location('HIB', 'CHX').get())
 
     def test_station_with_date(self, frozen_date):
-        """Queries for all services on a specific date: /json/search/<station>/<year>/<month>/<day>"""
+        """Queries for all services on a specific date.
+
+        Endpoint: /json/search/<station>/<year>/<month>/<day>
+        """
         self.assert_valid_location(Location('HIB', when=datetime.date.today()).get())
 
     def test_station_with_to_station_and_date(self, frozen_date):
@@ -75,7 +82,10 @@ class TestLocation:
         self.assert_valid_location(Location('HIB', 'CHX', datetime.date.today()).get())
 
     def test_station_with_datetime(self, frozen_date):
-        """Queries for services on a specific date and time: /json/search/<station>/<year>/<month>/<day>/<time>"""
+        """Queries for services on a specific date and time.
+
+        Endpoint: /json/search/<station>/<year>/<month>/<day>/<time>
+        """
         self.assert_valid_location(Location('HIB', when=datetime.datetime.now()).get())
 
     def test_station_with_to_station_and_datetime(self, frozen_date):
@@ -118,35 +128,29 @@ class TestLocation:
 
 
 class TestService:
-    """Integration tests for Service endpoint: /json/service/<serviceUid>/<year>/<month>/<day>"""
+    """Integration tests for the service endpoint.
+
+    Endpoint: /json/service/<serviceUid>/<year>/<month>/<day>
+    """
 
     expected_base = 'https://api.rtt.io/api/v1/json/service/'
 
     def assert_valid_service(self, data):
-        minimal_service_keys = {
-            'atocCode',
-            'atocName',
-            'destination',
-            'isPassenger',
-            'locations',
-            'origin',
-            'performanceMonitored',
-            'powerType',
-            'runDate',
-            'serviceType',
-            'serviceUid',
-            'trainClass',
-            'trainIdentity',
-        }
-        # every key must be in the data
-        assert minimal_service_keys.issubset(data.keys())
+        assert isinstance(data, ServiceResponse)
+        assert data.service_uid
+        assert data.origin
+        assert data.destination
+        assert data.locations
 
     def test_service_with_date(self, frozen_date, service_code):
         """Service query with date: /json/service/<serviceUid>/<year>/<month>/<day>"""
         self.assert_valid_service(Service(service_code, datetime.date.today()).get())
 
     def test_service_with_datetime(self, frozen_date, service_code):
-        """Service query with datetime (date part extracted): /json/service/<serviceUid>/<year>/<month>/<day>"""
+        """Service query with datetime (date part extracted).
+
+        Endpoint: /json/service/<serviceUid>/<year>/<month>/<day>
+        """
         self.assert_valid_service(Service(service_code, datetime.datetime.now()).get())
 
     def test_no_schedule_found_for_far_future(self, future_dt, service_code):

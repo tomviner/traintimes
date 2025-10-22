@@ -12,6 +12,7 @@ dependencies = [
   "requests>=2.31",
   "requests-cache>=1.2",
   "python-dotenv>=1",
+  "pydantic>=2.7",
 ]
 
 [project.urls]

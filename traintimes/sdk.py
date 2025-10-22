@@ -1,9 +1,15 @@
-import datetime
 import os
 
 import requests
 from dotenv import load_dotenv
 from purl import Template
+
+from .models import (
+    LocationRequest,
+    LocationResponse,
+    ServiceRequest,
+    ServiceResponse,
+)
 
 
 class ResponseError(Exception):
@@ -97,19 +103,32 @@ class Location(RTTBase):
     def __init__(self, station, to_station=None, when=None, arrivals=False, **kwargs):
         super(Location, self).__init__(**kwargs)
 
-        self.add_to_context('station', station)
+        self.request = LocationRequest.from_inputs(
+            station=station, to_station=to_station, when=when, arrivals=arrivals
+        )
 
-        if to_station:
-            self.add_to_context('tostation', '/to/{}'.format(to_station))
+        self.add_to_context('station', self.request.station)
 
-        if isinstance(when, datetime.date):
-            self.add_to_context('date', '/{0:%Y}/{0:%m}/{0:%d}'.format(when))
+        if self.request.to_station:
+            self.add_to_context('tostation', f"/to/{self.request.to_station}")
 
-        if isinstance(when, datetime.datetime):
-            self.add_to_context('time', '/{0:%H}{0:%M}'.format(when))
+        if self.request.date:
+            self.add_to_context(
+                'date',
+                f"/{self.request.date:%Y}/{self.request.date:%m}/{self.request.date:%d}",
+            )
 
-        if arrivals:
+        if self.request.time:
+            self.add_to_context(
+                'time', f"/{self.request.time:%H}{self.request.time:%M}"
+            )
+
+        if self.request.arrivals:
             self.add_to_context('arrivals', 'arrivals')
+
+    def get(self):
+        json_data = super().get()
+        return LocationResponse.model_validate(json_data)
 
 
 class Service(RTTBase):
@@ -130,9 +149,15 @@ class Service(RTTBase):
     def __init__(self, service, date, **kwargs):
         super(Service, self).__init__(**kwargs)
 
-        self.add_to_context('service', service)
+        self.request = ServiceRequest.from_inputs(service, date)
 
-        assert isinstance(date, datetime.date), "Expected {} got {}".format(
-            datetime.date, type(date)
+        self.add_to_context('service', self.request.service_uid)
+
+        self.add_to_context(
+            'date',
+            f"/{self.request.date:%Y}/{self.request.date:%m}/{self.request.date:%d}",
         )
-        self.add_to_context('date', '/{0:%Y}/{0:%m}/{0:%d}'.format(date))
+
+    def get(self):
+        json_data = super().get()
+        return ServiceResponse.model_validate(json_data)

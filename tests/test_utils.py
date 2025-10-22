@@ -1,8 +1,7 @@
 import datetime
 
-from freezegun import freeze_time
 import pytest
-
+from freezegun import freeze_time
 from utils import date_in_range
 
 
