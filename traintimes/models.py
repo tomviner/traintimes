@@ -170,7 +170,25 @@ class LocationService(BaseModel):
     destination: list[Pair] | None = Field(default=None, alias="destination")
     countdown_minutes: int | None = Field(default=None, alias="countdownMinutes")
 
+    @field_validator("origin", mode="before")
+    @classmethod
+    def _coerce_null_origin(
+        cls, value: list[Pair] | None
+    ) -> list[Pair]:
+        """The API can return ``null`` for the origin array when empty."""
+        if value is None:
+            return []
+        return value
 
+    @field_validator("destination", mode="before")
+    @classmethod
+    def _coerce_null_destination(
+        cls, value: list[Pair] | None
+    ) -> list[Pair]:
+        """The API can return ``null`` for the destination array when empty."""
+        if value is None:
+            return []
+        return value
 class LocationResponse(BaseModel):
     """Full response payload for the location line-up endpoint."""
 
