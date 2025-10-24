@@ -137,10 +137,6 @@ class TestLocation:
             response.services[0].location_detail.description == 'Highbury & Islington'
         )
 
-    def test_request_time_without_date(self):
-        with pytest.raises(ValueError):
-            LocationRequest(station='HIB', time=datetime.time(12, 0))
-
     def test_request_invalid_when_type(self):
         with pytest.raises(TypeError):
             LocationRequest.from_inputs('HIB', when=object())

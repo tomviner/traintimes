@@ -8,14 +8,12 @@ API and the responses returned from the location line-up and service
 information endpoints.
 """
 
-from __future__ import annotations
-
 import datetime as _dt
 import re
 from enum import Enum
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 _SERVICE_UID_RE = re.compile(r"^[A-Z][0-9]{5}$")
@@ -231,19 +229,6 @@ class LocationRequest(BaseModel):
         if value is None:
             return value
         return value.strip()
-
-    @field_validator("time")
-    @classmethod
-    def _discard_seconds(cls, value: _dt.time | None) -> _dt.time | None:
-        if value is None:
-            return None
-        return value.replace(second=0, microsecond=0)
-
-    @model_validator(mode="after")
-    def _time_requires_date(self) -> "LocationRequest":
-        if self.time and not self.date:
-            raise ValueError("time can only be supplied alongside date")
-        return self
 
     @classmethod
     def from_inputs(
