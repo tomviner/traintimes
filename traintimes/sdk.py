@@ -113,10 +113,15 @@ class Location(RTTBase):
             self.add_to_context('tostation', f"/to/{self.request.to_station}")
 
         if self.request.date:
-            self.add_to_context('date', f"{self.request.date:/%Y/%m/%d}")
+            self.add_to_context(
+                'date',
+                f"/{self.request.date:%Y}/{self.request.date:%m}/{self.request.date:%d}",
+            )
 
         if self.request.time:
-            self.add_to_context('time', f"/{self.request.time:%H%M}")
+            self.add_to_context(
+                'time', f"/{self.request.time:%H}{self.request.time:%M}"
+            )
 
         if self.request.arrivals:
             self.add_to_context('arrivals', 'arrivals')
@@ -150,7 +155,7 @@ class Service(RTTBase):
 
         self.add_to_context(
             'date',
-            f"/{self.request.date:%Y/%m/%d}",
+            f"/{self.request.date:%Y}/{self.request.date:%m}/{self.request.date:%d}",
         )
 
     def get(self):
