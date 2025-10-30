@@ -13,10 +13,14 @@ dependencies = [
   "requests-cache>=1.2",
   "python-dotenv>=1",
   "pydantic>=2.7",
+  "typer>=0.12",
 ]
 
 [project.urls]
 Homepage = "https://github.com/tomviner/traintimes"
+
+[project.scripts]
+traintimes = "traintimes.cli:app"
 
 [dependency-groups]
 test = [
