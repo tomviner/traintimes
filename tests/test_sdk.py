@@ -3,6 +3,12 @@ import datetime
 import pytest
 from freezegun import freeze_time
 
+from traintimes.models import (
+    LocationRequest,
+    LocationResponse,
+    ServiceRequest,
+    ServiceResponse,
+)
 from traintimes.sdk import Location, ResponseError, Service
 
 
@@ -25,11 +31,17 @@ class TestLocation:
         assert Location('HIB').uri == self.expected_base + 'HIB'
 
     def test_station_with_to_station(self):
-        """Normal queries filtered to a location: /json/search/<station>/to/<toStation>"""
+        """Normal queries filtered to a location.
+
+        Endpoint: /json/search/<station>/to/<toStation>
+        """
         assert Location('HIB', 'CHX').uri == self.expected_base + 'HIB/to/CHX'
 
     def test_station_with_date(self, dt):
-        """Queries for all services on a specific date: /json/search/<station>/<year>/<month>/<day>"""
+        """Queries for all services on a specific date.
+
+        Endpoint: /json/search/<station>/<year>/<month>/<day>
+        """
         assert (
             Location('HIB', when=datetime.date.today()).uri
             == self.expected_base + 'HIB/2025/10/16'
@@ -43,7 +55,10 @@ class TestLocation:
         )
 
     def test_station_with_datetime(self, dt):
-        """Queries for services on a specific date and time: /json/search/<station>/<year>/<month>/<day>/<time>"""
+        """Queries for services on a specific date and time.
+
+        Endpoint: /json/search/<station>/<year>/<month>/<day>/<time>
+        """
         assert (
             Location('HIB', when=datetime.datetime.now()).uri
             == self.expected_base + 'HIB/2025/10/16/2152'
@@ -81,6 +96,51 @@ class TestLocation:
             == self.expected_base + 'HIB/to/CHX/2025/10/16/2152/arrivals'
         )
 
+    def test_get_returns_location_response(self, requests_mock):
+        subject = Location('HIB')
+        sample = {
+            'location': {
+                'name': 'Highbury & Islington',
+                'crs': 'HIB',
+                'tiploc': 'HIBURY',
+            },
+            'filter': None,
+            'services': [
+                {
+                    'locationDetail': {
+                        'realtimeActivated': True,
+                        'tiploc': 'HIBURY',
+                        'crs': 'HIB',
+                        'description': 'Highbury & Islington',
+                        'origin': [],
+                        'destination': [],
+                        'isCall': True,
+                        'isPublicCall': True,
+                    },
+                    'serviceUid': 'A12345',
+                    'runDate': '2024-01-01',
+                    'trainIdentity': '1A23',
+                    'runningIdentity': '1A23',
+                    'atocCode': 'ZZ',
+                    'atocName': 'Zed Rail',
+                    'serviceType': 'train',
+                    'isPassenger': True,
+                }
+            ],
+        }
+        requests_mock.get(subject.uri, json=sample)
+        response = subject.get()
+
+        assert isinstance(response, LocationResponse)
+        assert response.services[0].service_uid == 'A12345'
+        assert (
+            response.services[0].location_detail.description == 'Highbury & Islington'
+        )
+
+    def test_request_invalid_when_type(self):
+        with pytest.raises(TypeError):
+            LocationRequest.from_inputs('HIB', when=object())
+
 
 class TestService:
     """Test Service endpoint URI generation"""
@@ -95,11 +155,70 @@ class TestService:
         )
 
     def test_service_with_datetime(self, dt):
-        """Service with datetime (date part extracted): /json/service/<serviceUid>/<year>/<month>/<day>"""
+        """Service with datetime (date part extracted).
+
+        Endpoint: /json/service/<serviceUid>/<year>/<month>/<day>
+        """
         assert (
             Service('W12345', datetime.datetime.now()).uri
             == self.expected_base + 'W12345/2025/10/16'
         )
+
+    def test_get_returns_service_response(self, requests_mock):
+        subject = Service('A12345', datetime.date(2024, 1, 1))
+        sample = {
+            'serviceUid': 'A12345',
+            'runDate': '2024-01-01',
+            'serviceType': 'train',
+            'isPassenger': True,
+            'trainIdentity': '1A23',
+            'powerType': 'EMU',
+            'trainClass': 'SD',
+            'sleeper': None,
+            'atocCode': 'ZZ',
+            'atocName': 'Zed Rail',
+            'performanceMonitored': True,
+            'origin': [
+                {
+                    'tiploc': 'ORIGIN',
+                    'description': 'Origin',
+                    'workingTime': '080000',
+                    'publicTime': '0800',
+                }
+            ],
+            'destination': [
+                {
+                    'tiploc': 'DEST',
+                    'description': 'Destination',
+                    'workingTime': '090000',
+                    'publicTime': '0900',
+                }
+            ],
+            'locations': [
+                {
+                    'realtimeActivated': True,
+                    'tiploc': 'ORIGIN',
+                    'crs': 'ORG',
+                    'description': 'Origin',
+                    'origin': [],
+                    'destination': [],
+                    'isCall': True,
+                    'isPublicCall': True,
+                }
+            ],
+            'realtimeActivated': True,
+            'runningIdentity': '1A23',
+        }
+        requests_mock.get(subject.uri, json=sample)
+        response = subject.get()
+
+        assert isinstance(response, ServiceResponse)
+        assert response.service_uid == 'A12345'
+        assert response.locations[0].tiploc == 'ORIGIN'
+
+    def test_service_request_invalid_date_type(self):
+        with pytest.raises(TypeError):
+            ServiceRequest.from_inputs('A12345', '2024-01-01')
 
 
 class TestErrorHandling:
