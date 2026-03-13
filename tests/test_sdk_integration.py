@@ -46,7 +46,7 @@ def future_dt(frozen_date):
 
 @pytest.fixture
 def service_code(frozen_date):
-    return Location('HIB', 'CHX', datetime.datetime.now()).get().services[0].service_uid
+    return Location('HIB', when=datetime.datetime.now()).get().services[0].service_uid
 
 
 class TestLocation:
