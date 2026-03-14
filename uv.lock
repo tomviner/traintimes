@@ -317,6 +317,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pydantic-cli"
+version = "10.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3d/45/b383f86c77e9f38360f66253a223f127a74a58aa46e22e52011093f83b3a/pydantic_cli-10.0.0.tar.gz", hash = "sha256:1439d1db73664177c838ca1b90ae8eca19c65ce3b119a79a7b6c6f07cb79874a", size = 34984, upload-time = "2025-10-16T07:00:45.091Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/41/5262fca75b48906b03bd1e156b99330699b59a198b220051128a23917e9a/pydantic_cli-10.0.0-py3-none-any.whl", hash = "sha256:e3778aed1e412c9962812af6a11d92ba514df6266bd60835f843b6332dae6eed", size = 43076, upload-time = "2025-10-16T07:00:43.705Z" },
+]
+
+[[package]]
 name = "pydantic-core"
 version = "2.41.3"
 source = { registry = "https://pypi.org/simple" }
@@ -601,6 +613,7 @@ source = { editable = "." }
 dependencies = [
     { name = "purl" },
     { name = "pydantic" },
+    { name = "pydantic-cli" },
     { name = "python-dotenv" },
     { name = "requests" },
     { name = "requests-cache" },
@@ -618,6 +631,7 @@ test = [
 requires-dist = [
     { name = "purl", specifier = ">=1.1" },
     { name = "pydantic", specifier = ">=2.7" },
+    { name = "pydantic-cli", specifier = ">=10" },
     { name = "python-dotenv", specifier = ">=1" },
     { name = "requests", specifier = ">=2.31" },
     { name = "requests-cache", specifier = ">=1.2" },
